@@ -1,3 +1,3 @@
-module js/monkey
+module monkey
 
 go 1.21.6
