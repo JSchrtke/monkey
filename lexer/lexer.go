@@ -1,6 +1,8 @@
 package lexer
 
-import "monkey/token"
+import (
+	"monkey/token"
+)
 
 type Lexer struct {
 	input        string
@@ -18,30 +20,48 @@ func MakeLexer(input string) *Lexer {
 func (self *Lexer) NextToken() token.Token {
 	var tok token.Token
 
+	self.skipWhitespace()
+
 	switch self.currentChar {
 	case '=':
-		tok = newToken(token.ASSING, self.currentChar)
+		tok = newToken(token.ASSING, string(self.currentChar))
 	case '+':
-		tok = newToken(token.PLUS, self.currentChar)
+		tok = newToken(token.PLUS, string(self.currentChar))
 	case ',':
-		tok = newToken(token.COMMA, self.currentChar)
+		tok = newToken(token.COMMA, string(self.currentChar))
 	case ';':
-		tok = newToken(token.SEMICOLON, self.currentChar)
+		tok = newToken(token.SEMICOLON, string(self.currentChar))
 	case '(':
-		tok = newToken(token.LPAREN, self.currentChar)
+		tok = newToken(token.LPAREN, string(self.currentChar))
 	case ')':
-		tok = newToken(token.RPAREN, self.currentChar)
+		tok = newToken(token.RPAREN, string(self.currentChar))
 	case '{':
-		tok = newToken(token.LBRACE, self.currentChar)
+		tok = newToken(token.LBRACE, string(self.currentChar))
 	case '}':
-		tok = newToken(token.RBRACE, self.currentChar)
+		tok = newToken(token.RBRACE, string(self.currentChar))
 	case 0:
-		tok = newToken(token.EOF, 0)
+		tok = newToken(token.EOF, "")
 	default:
+		if isDigit(self.currentChar) {
+			tok = newToken(token.INT, self.readNumber())
+			return tok
+		}
+
 		if isLetter(self.currentChar) {
-			// todo
-		} else {
-			tok = newToken(token.ILLEGAL, self.currentChar)
+			word := self.readLetters()
+
+			if word == "let" {
+				tok = newToken(token.LET, word)
+				return tok
+			}
+
+			if word == "fn" {
+				tok = newToken(token.FUNCTION, word)
+				return tok
+			}
+
+			tok = newToken(token.IDENT, word)
+			return tok
 		}
 	}
 
@@ -49,12 +69,45 @@ func (self *Lexer) NextToken() token.Token {
 	return tok
 }
 
+func (self *Lexer) skipWhitespace() {
+	for isWhitespace(self.currentChar) {
+		self.readChar()
+	}
+}
+
+func newToken(tokenType token.TokenType, literal string) token.Token {
+	return token.Token{Type: tokenType, Literal: literal}
+}
+
+// is the vertical tab a thing that needs to be considered?
+func isWhitespace(b byte) bool {
+	return b == 9 || b == 32 || b == 10 || b == 13
+}
+
+func (self *Lexer) readNumber() string {
+	digits := ""
+	for isDigit(self.currentChar) {
+		digits += string(self.currentChar)
+		self.readChar()
+	}
+	return digits
+}
+
+func isDigit(b byte) bool {
+	return 48 <= b && b <= 57
+}
+
 func isLetter(b byte) bool {
 	return 65 <= b && b <= 90 || 97 <= b && b <= 122
 }
 
-func newToken(tokenType token.TokenType, char byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(char)}
+func (self *Lexer) readLetters() string {
+	letters := ""
+	for isLetter(self.currentChar) {
+		letters = letters + string(self.currentChar)
+		self.readChar()
+	}
+	return letters
 }
 
 func (self *Lexer) readChar() {

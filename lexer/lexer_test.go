@@ -45,11 +45,12 @@ func TestNextToken(t *testing.T) {
 		{Type: token.IDENT, Literal: "y"},
 		{Type: token.SEMICOLON, Literal: ";"},
 
-		{Type: token.RPAREN, Literal: "}"},
+		{Type: token.RBRACE, Literal: "}"},
 		{Type: token.SEMICOLON, Literal: ";"},
 
 		{Type: token.LET, Literal: "let"},
 		{Type: token.IDENT, Literal: "result"},
+		{Type: token.ASSING, Literal: "="},
 		{Type: token.IDENT, Literal: "add"},
 		{Type: token.LPAREN, Literal: "("},
 		{Type: token.IDENT, Literal: "five"},
